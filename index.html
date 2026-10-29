@@ -1,1 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Егор Тетрис</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; padding: 20px 10px;
+  background: linear-gradient(145deg,#101025,#20204b);
+  color: white; font-family: Arial,sans-serif;
+  text-align: center; touch-action: manipulation;
+}
+h1 { color: #60f5ff; margin: 4px 0 8px; }
+p { color: #c9c9e8; margin: 8px; }
+#score { font-size: 22px; margin: 12px; font-weight: bold; }
+canvas {
+  display: block; width: min(90vw,300px);
+  height: auto; margin: 12px auto;
+  border: 3px solid #60f5ff; border-radius: 5px;
+  background: #080816; max-height: 60vh;
+}
+button {
+  border: 0; border-radius: 14px; padding: 14px 18px;
+  margin: 5px; font-size: 18px; font-weight: bold;
+  color: #101025; background: #60f5ff;
+  cursor: pointer; touch-action: manipulation;
+  user-select: none; -webkit-user-select: none;
+}
+button:active { background: #ff71cf; transform: scale(.96); }
+.controls { max-width: 340px; margin: 12px auto; }
+.controls button { min-width: 66px; }
+#start { background: #ff71cf; }
+</style>
+</head>
+<body>
+<h1>🎮 ЕГОР ТЕТРИС</h1>
+<p>Собирай линии и набирай очки!</p>
+<div id="score">Очки: 0</div>
+<canvas id="game" width="300" height="600"></canvas>
+<div><button id="start">▶ Начать заново</button></div>
+<div class="controls">
+  <div>
+    <button id="left">⬅️</button>
+    <button id="rotate">🔄</button>
+    <button id="right">➡️</button>
+  </div>
+  <div>
+    <button id="down">⬇️ Вниз</button>
+    <button id="drop">⏬ Сброс</button>
+  </div>
+</div>
+<p>На компьютере: ← → ↓ и ↑ для поворота</p>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const COLS = 10, ROWS = 20, SIZE = 30;
+const colors = [null,"#60f5ff","#ffe45e","#bd72ff",
+ "#ff9e45","#5685ff","#59ed91","#ff638b"];
+const shapes = [
+ [[1,1,1,1]],
+ [[2,2],[2,2]],
+ [[0,3,0],[3,3,3]],
+ [[4,0,0],[4,4,4]],
+ [[0,0,5],[5,5,5]],
+ [[0,6,6],[6,6,0]],
+ [[7,7,0],[0,7,7]]
+];
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Егор Тетрис</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; padding: 20px 10px;
+  background: linear-gradient(145deg,#101025,#20204b);
+  color: white; font-family: Arial,sans-serif;
+  text-align: center; touch-action: manipulation;
+}
+h1 { color: #60f5ff; margin: 4px 0 8px; }
+p { color: #c9c9e8; margin: 8px; }
+#score { font-size: 22px; margin: 12px; font-weight: bold; }
+canvas {
+  display: block; width: min(90vw,300px);
+  height: auto; margin: 12px auto;
+  border: 3px solid #60f5ff; border-radius: 5px;
+  background: #080816; max-height: 60vh;
+}
+button {
+  border: 0; border-radius: 14px; padding: 14px 18px;
+  margin: 5px; font-size: 18px; font-weight: bold;
+  color: #101025; background: #60f5ff;
+  cursor: pointer; touch-action: manipulation;
+  user-select: none; -webkit-user-select: none;
+}
+button:active { background: #ff71cf; transform: scale(.96); }
+.controls { max-width: 340px; margin: 12px auto; }
+.controls button { min-width: 66px; }
+#start { background: #ff71cf; }
+</style>
+</head>
+<body>
+<h1>🎮 ЕГОР ТЕТРИС</h1>
+<p>Собирай линии и набирай очки!</p>
+<div id="score">Очки: 0</div>
+<canvas id="game" width="300" height="600"></canvas>
+<div><button id="start">▶ Начать заново</button></div>
+<div class="controls">
+  <div>
+    <button id="left">⬅️</button>
+    <button id="rotate">🔄</button>
+    <button id="right">➡️</button>
+  </div>
+  <div>
+    <button id="down">⬇️ Вниз</button>
+    <button id="drop">⏬ Сброс</button>
+  </div>
+</div>
+<p>На компьютере: ← → ↓ и ↑ для поворота</p>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const COLS = 10, ROWS = 20, SIZE = 30;
+const colors = [null,"#60f5ff","#ffe45e","#bd72ff",
+ "#ff9e45","#5685ff","#59ed91","#ff638b"];
+const shapes = [
+ [[1,1,1,1]],
+ [[2,2],[2,2]],
+ [[0,3,0],[3,3,3]],
+ [[4,0,0],[4,4,4]],
+ [[0,0,5],[5,5,5]],
+ [[0,6,6],[6,6,0]],
+ [[7,7,0],[0,7,7]]
+];
+let board, piece, score, running = false, over = false;
+let last = 0, timer = 0, animation;
+
+function newBoard() {
+ return Array.from({length:ROWS},()=>Array(COLS).fill(0));
+}
+function newPiece() {
+ const shape = shapes[Math.floor(Math.random()*shapes.length)];
+ const matrix = shape.map(row=>row.slice());
+ return {
+  matrix,
+  x:Math.floor((COLS-matrix[0].length)/2),
+  y:0,
+  color:matrix[0][0] || matrix[1][0] || matrix[0][1] || 1
+ };
+}
+function collide(p, dx=0, dy=0, matrix=p.matrix) {
+ for(let y=0;y<matrix.length;y++)
+  for(let x=0;x<matrix[y].length;x++)
+   if(matrix[y][x]) {
+    const nx=p.x+x+dx, ny=p.y+y+dy;
+    if(nx<0||nx>=COLS||ny>=ROWS) return true;
+    if(ny>=0 && board[ny][nx]) return true;
+   }
+ return false;
+}
+function drawCell(x,y,color) {
+ ctx.fillStyle=color;
+ ctx.fillRect(x*SIZE+1,y*SIZE+1,SIZE-2,SIZE-2);
+ ctx.strokeStyle="#ffffff35";
+ ctx.strokeRect(x*SIZE+2,y*SIZE+2,SIZE-4,SIZE-4);
+}
+function draw() {
+ ctx.fillStyle="#080816";
+ ctx.fillRect(0,0,canvas.width,canvas.height);
+ for(let y=0;y<ROWS;y++)
+  for(let x=0;x<COLS;x++) {
+   if(board[y][x]) drawCell(x,y,colors[board[y][x]]);
+   else {
+    ctx.strokeStyle="#292941";
+    ctx.strokeRect(x*SIZE,y*SIZE,SIZE,SIZE);
+   }
+  }
+ if(piece)
+  for(let y=0;y<piece.matrix.length;y++)
+   for(let x=0;x<piece.matrix[y].length;x++)
+    if(piece.matrix[y][x])
+     drawCell(piece.x+x,piece.y+y,colors[piece.color]);
+ if(over) {
+  ctx.fillStyle="#000000bb";
+  ctx.fillRect(0,240,300,120);
+  ctx.fillStyle="white";
+  ctx.textAlign="center";
+  ctx.font="bold 28px Arial";
+  ctx.fillText("ИГРА ОКОНЧЕНА",150,290);
+  ctx.font="18px Arial";
+  ctx.fillText("Нажми «Начать заново»",150,325);
+ }
+}
+function lockPiece() {
+ for(let y=0;y<piece.matrix.length;y++)
+  for(let x=0;x<piece.matrix[y].length;x++)
+   if(piece.matrix[y][x]) {
+    const ny=piece.y+y;
+    if(ny<0) { endGame(); return; }
+    board[ny][piece.x+x]=piece.color;
+   }
+ let lines=0;
+ for(let y=ROWS-1;y>=0;y--)
+  if(board[y].every(cell=>cell!==0)) {
+   board.splice(y,1);
+   board.unshift(Array(COLS).fill(0));
+   lines++; y++;
+  }
+ score += [0,100,300,500,800][lines] || lines*200;
+ document.getElementById("score").textContent="Очки: "+score;
+ piece=newPiece();
+ if(collide(piece)) endGame();
+}
+function move(dx,dy) {
+ if(!running||over) return;
+ if(!collide(piece,dx,dy)) {
+  piece.x+=dx; piece.y+=dy;
+ } else if(dy>0) lockPiece();
+ draw();
+}
+function rotate() {
+ if(!running||over) return;
+ const m=piece.matrix;
+ const rotated=m[0].map((_,i)=>m.map(row=>row[i]).reverse());
+ if(!collide(piece,0,0,rotated)) piece.matrix=rotated;
+ else {
+  for(const dx of [-1,1,-2,2])
+   if(!collide(piece,dx,0,rotated)) {
+    piece.x+=dx; piece.matrix=rotated; break;
+   }
+ }
+ draw();
+}
+function endGame() {
+ over=true; running=false; draw();
+}
 
